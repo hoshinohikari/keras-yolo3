@@ -2,18 +2,26 @@ import sys
 import argparse
 from yolo import YOLO, detect_video
 from PIL import Image
+import cv2
 
 def detect_img(yolo):
     while True:
-        img = input('Input image filename:')
-        try:
-            image = Image.open(img)
-        except:
-            print('Open Error! Try again!')
-            continue
+        img = raw_input('Input image filename:')
+        if (img != "quit"):
+            try:
+                #image = Image.open(img)
+                image = cv2.imread(img)
+            except:
+                print('Open Error! Try again!')
+                continue
+            else:
+                r_image = yolo.detect_image(image)
+                #r_image.show()
+                cv2.imshow("r_image", r_image)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
         else:
-            r_image = yolo.detect_image(image)
-            r_image.show()
+            break
     yolo.close_session()
 
 FLAGS = None

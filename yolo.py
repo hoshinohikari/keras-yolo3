@@ -12,6 +12,7 @@ from keras import backend as K
 from keras.models import load_model
 from keras.layers import Input
 from PIL import Image, ImageFont, ImageDraw
+import cv2
 
 from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
 from yolo3.utils import letterbox_image
@@ -110,25 +111,28 @@ class YOLO(object):
             new_image_size = (image.width - (image.width % 32),
                               image.height - (image.height % 32))
             boxed_image = letterbox_image(image, new_image_size)
+
         image_data = np.array(boxed_image, dtype='float32')
 
-        print(image_data.shape)
+        print(boxed_image.shape)
         image_data /= 255.
         image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
+
+        isize = image.shape
 
         out_boxes, out_scores, out_classes = self.sess.run(
             [self.boxes, self.scores, self.classes],
             feed_dict={
                 self.yolo_model.input: image_data,
-                self.input_image_shape: [image.size[1], image.size[0]],
+                self.input_image_shape: [isize[0], isize[1]],
                 K.learning_phase(): 0
             })
 
         print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
 
-        font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
-                    size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
-        thickness = (image.size[0] + image.size[1]) // 300
+        #font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
+        #            size=np.floor(3e-2 * isize[1] + 0.5).astype('int32'))
+        thickness = (isize[0] + isize[1]) // 300
 
         for i, c in reversed(list(enumerate(out_classes))):
             predicted_class = self.class_names[c]
@@ -136,31 +140,34 @@ class YOLO(object):
             score = out_scores[i]
 
             label = '{} {:.2f}'.format(predicted_class, score)
-            draw = ImageDraw.Draw(image)
-            label_size = draw.textsize(label, font)
+            #draw = ImageDraw.Draw(image)
+            #label_size = draw.textsize(label, font)
 
             top, left, bottom, right = box
+            print(box)
             top = max(0, np.floor(top + 0.5).astype('int32'))
             left = max(0, np.floor(left + 0.5).astype('int32'))
-            bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
-            right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
+            bottom = min(isize[0], np.floor(bottom + 0.5).astype('int32'))
+            right = min(isize[1], np.floor(right + 0.5).astype('int32'))
             print(label, (left, top), (right, bottom))
 
-            if top - label_size[1] >= 0:
-                text_origin = np.array([left, top - label_size[1]])
-            else:
-                text_origin = np.array([left, top + 1])
+            #if top - label_size[1] >= 0:
+            #    text_origin = np.array([left, top - label_size[1]])
+            #else:
+            #    text_origin = np.array([left, top + 1])
 
             # My kingdom for a good redistributable image drawing library.
             for i in range(thickness):
-                draw.rectangle(
-                    [left + i, top + i, right - i, bottom - i],
-                    outline=self.colors[c])
-            draw.rectangle(
-                [tuple(text_origin), tuple(text_origin + label_size)],
-                fill=self.colors[c])
-            draw.text(text_origin, label, fill=(0, 0, 0), font=font)
-            del draw
+                cv2.rectangle(image, (left + i, top + i), (right - i, bottom - i), self.colors[c], thickness = 2)
+                #draw.rectangle(
+                #    [left + i, top + i, right - i, bottom - i],
+                #    outline=self.colors[c])
+            #draw.rectangle(
+            #    [tuple(text_origin), tuple(text_origin + label_size)],
+            #    fill=self.colors[c])
+            #cv2.putText(image, label, (left + i, top + i), cv2.FONT_HERSHEY_SIMPLEX, 1, self.colors[c])
+            #draw.text(text_origin, label, fill=(0, 0, 0), font=font)
+            #del draw
 
         end = timer()
         print(end - start)
@@ -170,7 +177,6 @@ class YOLO(object):
         self.sess.close()
 
 def detect_video(yolo, video_path, output_path=""):
-    import cv2
     vid = cv2.VideoCapture(video_path)
     if not vid.isOpened():
         raise IOError("Couldn't open webcam or video")
@@ -188,9 +194,9 @@ def detect_video(yolo, video_path, output_path=""):
     prev_time = timer()
     while True:
         return_value, frame = vid.read()
-        image = Image.fromarray(frame)
-        image = yolo.detect_image(image)
-        result = np.asarray(image)
+        #image = Image.fromarray(frame)
+        result = yolo.detect_image(frame)
+        #result = np.asarray(image)
         curr_time = timer()
         exec_time = curr_time - prev_time
         prev_time = curr_time
