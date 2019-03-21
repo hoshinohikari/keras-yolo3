@@ -1,6 +1,6 @@
 import sys
 import argparse
-from yolo import YOLO, detect_video
+from yolo import YOLO, detect_video, detect_cam
 from PIL import Image
 import cv2
 
@@ -70,6 +70,11 @@ if __name__ == '__main__':
         help = "[Optional] Video output path"
     )
 
+    parser.add_argument(
+        "--camera", nargs='?', type=int, required=False, default=0,
+        help = "Camera mode, will ignore all positional arguments, please input your camera number"
+    )
+
     FLAGS = parser.parse_args()
 
     if FLAGS.image:
@@ -80,7 +85,11 @@ if __name__ == '__main__':
         if "input" in FLAGS:
             print(" Ignoring remaining command line arguments: " + FLAGS.input + "," + FLAGS.output)
         detect_img(YOLO(**vars(FLAGS)))
+    elif ("camera" in FLAGS) and (FLAGS.input == './path2your_video'):
+        print("Camera mode")
+        detect_cam(YOLO(**vars(FLAGS)), FLAGS.camera, FLAGS.output)
     elif "input" in FLAGS:
+        print("Video mode")
         detect_video(YOLO(**vars(FLAGS)), FLAGS.input, FLAGS.output)
     else:
         print("Must specify at least video_input_path.  See usage with --help.")

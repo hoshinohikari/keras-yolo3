@@ -11,6 +11,10 @@ Rewriting based on the [original project](https://github.com/qqwweee/keras-yolo3
 1. Based on Python 2
 2. Complete replacement of PIL by OpenCV
 
+## Progressing
+1. You can use python 2 to complete all the operations in the detection section.
+2. The detection part has been completely composed of OpenCV
+3. Added independent options when using the camera
 
 ---
 
@@ -24,7 +28,8 @@ Rewriting based on the [original project](https://github.com/qqwweee/keras-yolo3
 wget https://pjreddie.com/media/files/yolov3.weights
 python convert.py yolov3.cfg yolov3.weights model_data/yolo.h5
 python yolo_video.py [OPTIONS...] --image, for image detection mode, OR
-python yolo_video.py [video_path] [output_path (optional)]
+python yolo_video.py [video_path] [output_path (optional)], OR
+python yolo_video.py [camera_number] [output_path (optional)]
 ```
 
 For Tiny YOLOv3, just do in a similar way, just specify model path and anchor path with `--model model_file` and `--anchors anchor_file`.
@@ -34,11 +39,7 @@ Use --help to see usage of yolo_video.py:
 ```
 usage: yolo_video.py [-h] [--model MODEL] [--anchors ANCHORS]
                      [--classes CLASSES] [--gpu_num GPU_NUM] [--image]
-                     [--input] [--output]
-
-positional arguments:
-  --input        Video input path
-  --output       Video output path
+                     [--input [INPUT]] [--output [OUTPUT]] [--camera [CAMERA]]
 
 optional arguments:
   -h, --help         show this help message and exit
@@ -48,7 +49,12 @@ optional arguments:
   --classes CLASSES  path to class definitions, default
                      model_data/coco_classes.txt
   --gpu_num GPU_NUM  Number of GPU to use, default 1
-  --image            Image detection mode, will ignore all positional arguments
+  --image            Image detection mode, will ignore all positional
+                     arguments
+  --input [INPUT]    Video input path
+  --output [OUTPUT]  [Optional] Video output path
+  --camera [CAMERA]  Camera mode, will ignore all positional arguments, please
+                     input your camera number
 ```
 ---
 
