@@ -81,7 +81,7 @@ class YOLO(object):
         print('{} model, anchors, and classes loaded.'.format(model_path))
 
         # Generate colors for drawing bounding boxes.
-        hsv_tuples = [(x / len(self.class_names), 1., 1.)
+        hsv_tuples = [(float(x) / len(self.class_names), 1., 1.)
                       for x in range(len(self.class_names))]
         self.colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
         self.colors = list(
@@ -150,6 +150,7 @@ class YOLO(object):
             bottom = min(isize[0], np.floor(bottom + 0.5).astype('int32'))
             right = min(isize[1], np.floor(right + 0.5).astype('int32'))
             print(label, (left, top), (right, bottom))
+            print('color {}'.format(self.colors[c]))
 
             #if top - label_size[1] >= 0:
             #    text_origin = np.array([left, top - label_size[1]])

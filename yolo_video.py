@@ -8,9 +8,10 @@ def detect_img(yolo):
     while True:
         img = raw_input('Input image filename:')
         if (img != "quit"):
+            image = cv2.imread(img)
             try:
+                size = image.shape
                 #image = Image.open(img)
-                image = cv2.imread(img)
             except:
                 print('Open Error! Try again!')
                 continue
